@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import '../Home/homepage.dart';
+
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key});
 
@@ -119,16 +121,16 @@ class _LoginPageState extends State<LoginPage> {
 }
 
 // Placeholder for HomePage, replace with your actual HomePage widget
-class HomePage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Home Page"),
-      ),
-      body: Center(
-        child: Text("Welcome to the Home Page!"),
-      ),
-    );
-  }
-}
+// class HomePage extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: Text("Home Page"),
+//       ),
+//       body: Center(
+//         child: Text("Welcome to the Home Page!"),
+//       ),
+//     );
+//   }
+// }
