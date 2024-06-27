@@ -1,59 +1,30 @@
 import 'package:flutter/material.dart';
-import 'Authentication/register.dart';
-import 'register.dart'; // Correct import
+import 'Home/homepage.dart';
+import 'homepage.dart'; // Import your HomePage
+import 'Authentication/register.dart'; // Import your RegisterScreen
 
 void main() {
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({Key? key}) : super(key: key); // Corrected super.key to Key? key
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSwatch(
+          primarySwatch: Colors.deepPurple, // Changed seedColor to primarySwatch
+        ),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      initialRoute: '/', // Define initialRoute
       routes: {
-        '/register': (context) => const RegisterScreen(), // Correct class name
+        '/': (context) => HomePage(),
+        '/register': (context) => RegisterScreen(),
       },
-    );
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pushNamed(context, '/register');
-              },
-              child: const Text('Go to Register Page'),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

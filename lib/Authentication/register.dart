@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class RegisterScreen extends StatefulWidget {
-  const RegisterScreen({super.key}); // Add super.key
+  const RegisterScreen({Key? key}) : super(key: key);
 
   @override
   _RegisterScreenState createState() => _RegisterScreenState();
@@ -140,6 +140,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           if (_formKey.currentState!.validate()) {
                             _formKey.currentState!.save();
                             // Add your registration logic here
+
+                            // After successful registration, navigate back to HomePage
+                            Navigator.pop(context); // This will pop the RegisterScreen off the stack
                           }
                         },
                         style: ElevatedButton.styleFrom(
