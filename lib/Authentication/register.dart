@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({Key? key}) : super(key: key);
@@ -11,9 +13,42 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
   String _username = '';
   String _email = '';
-  String _role = 'Customer';
+  String _role = 'customer'; // Adjust to match the 'in:admin,customer' validation rule
   String _contactNumber = '';
   String _password = '';
+
+  Future<void> _register() async {
+    try {
+      final response = await http.post(
+        Uri.parse('http://192.168.43.243:80/api/register'), // Replace with your backend API URL
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(<String, String>{
+          'username': _username,
+          'email': _email,
+          'role': _role,
+          'contact_number': _contactNumber, // Adjust to match backend field name
+          'password': _password,
+        }),
+      );
+
+      final responseBody = jsonDecode(response.body);
+      if (response.statusCode == 200 && responseBody['message'] == 'User created') {
+        // If the server returns a 200 OK response with 'User created' message,
+        // it means the registration was successful.
+        Navigator.pushReplacementNamed(context, '/login'); // Navigate to login page
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(responseBody['message'] ?? 'Registration failed')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Network error: $e')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +76,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     const SizedBox(height: 100),
                     const CircleAvatar(
                       radius: 50,
-                      backgroundImage: AssetImage('assets/logo.png'),
+                      backgroundImage: AssetImage('assets/logo.jpeg'),
                     ),
                     const SizedBox(height: 50),
                     TextFormField(
@@ -55,6 +90,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           borderSide: BorderSide.none,
                         ),
                       ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter a username';
+                        }
+                        return null;
+                      },
                       onSaved: (value) {
                         _username = value!;
                       },
@@ -71,32 +112,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           borderSide: BorderSide.none,
                         ),
                       ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter an email';
+                        }
+                        if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
+                          return 'Please enter a valid email';
+                        }
+                        return null;
+                      },
                       onSaved: (value) {
                         _email = value!;
-                      },
-                    ),
-                    const SizedBox(height: 20),
-                    DropdownButtonFormField<String>(
-                      value: _role,
-                      decoration: InputDecoration(
-                        prefixIcon: const Icon(Icons.person_outline),
-                        filled: true,
-                        fillColor: Colors.white,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10.0),
-                          borderSide: BorderSide.none,
-                        ),
-                      ),
-                      items: ['Admin', 'Customer']
-                          .map((label) => DropdownMenuItem(
-                        child: Text(label),
-                        value: label,
-                      ))
-                          .toList(),
-                      onChanged: (value) {
-                        setState(() {
-                          _role = value!;
-                        });
                       },
                     ),
                     const SizedBox(height: 20),
@@ -111,6 +137,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           borderSide: BorderSide.none,
                         ),
                       ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter a contact number';
+                        }
+                        return null;
+                      },
                       onSaved: (value) {
                         _contactNumber = value!;
                       },
@@ -128,6 +160,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ),
                       ),
                       obscureText: true,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter a password';
+                        }
+                        if (value.length < 8) {
+                          return 'Password must be at least 8 characters long';
+                        }
+                        return null;
+                      },
                       onSaved: (value) {
                         _password = value!;
                       },
@@ -139,10 +180,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         onPressed: () {
                           if (_formKey.currentState!.validate()) {
                             _formKey.currentState!.save();
-                            // Add your registration logic here
-
-                            // After successful registration, navigate back to HomePage
-                            Navigator.pop(context); // This will pop the RegisterScreen off the stack
+                            _register();
                           }
                         },
                         style: ElevatedButton.styleFrom(
