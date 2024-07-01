@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:itt632_nashcafe/Admin%20Directory/admin_home.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
 import '../Home/homepage.dart';
@@ -15,6 +17,30 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  bool isAdmin = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkLoginStatus();
+  }
+
+  Future<void> _checkLoginStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+
+    if (isLoggedIn) {
+      String role = prefs.getString('role') ?? 'customer';
+      setState(() {
+        isAdmin = role == 'admin'; // Update isAdmin based on the role
+      });
+      if (isAdmin) {
+        Navigator.pushReplacementNamed(context, '/admin-home');
+      } else {
+        Navigator.pushReplacementNamed(context, '/customer-home');
+      }
+    }
+  }
 
   Future<void> _login() async {
     final response = await http.post(
@@ -35,38 +61,43 @@ class _LoginPageState extends State<LoginPage> {
       int userId = data['userId'];
 
       // Handle successful login
-      print('Logged in successfully!');
-      print('Token: $token');
-      print('Role: $role');
-      print('User ID: $userId');
-
       // Store token and userId for future requests
+      final prefs = await SharedPreferences.getInstance();
+      prefs.setString('token', token);
+      prefs.setInt('userId', userId);
+      prefs.setString('role', role); // Save the role
+      prefs.setBool('isLoggedIn', true);
       // You can use Flutter Secure Storage to store the token securely
+      setState(() {
+        isAdmin = role == 'admin'; // Update isAdmin based on the role after login
+      });
 
-      // Navigate to the next screen
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => HomePage()), // Replace with your HomePage
-      );
+      if (isAdmin) {
+        Navigator.pushReplacementNamed(context, '/admin-home');
+      } else {
+        Navigator.pushReplacementNamed(context, '/customer-home');
+      }
     } else {
-      // Handle login error
-      print('Login failed: ${response.body}');
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text('Login Failed'),
-          content: Text('Invalid credentials, please try again.'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text('OK'),
-            ),
-          ],
-        ),
-      );
+      _showLoginError();
     }
+  }
+
+  void _showLoginError() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Login Failed'),
+        content: Text('Invalid credentials, please try again.'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: Text('OK'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -119,18 +150,3 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 }
-
-// Placeholder for HomePage, replace with your actual HomePage widget
-// class HomePage extends StatelessWidget {
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: Text("Home Page"),
-//       ),
-//       body: Center(
-//         child: Text("Welcome to the Home Page!"),
-//       ),
-//     );
-//   }
-// }

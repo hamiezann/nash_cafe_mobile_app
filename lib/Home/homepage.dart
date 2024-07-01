@@ -1,6 +1,32 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  @override
+  void initState() {
+    super.initState();
+    _checkLoginStatus();
+  }
+
+  Future<void> _checkLoginStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+    bool isAdmin = prefs.getString('role') == 'admin';
+
+    if (isLoggedIn) {
+      if (isAdmin) {
+        Navigator.pushReplacementNamed(context, '/admin-home');
+      } else {
+        Navigator.pushReplacementNamed(context, '/customer-home');
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
