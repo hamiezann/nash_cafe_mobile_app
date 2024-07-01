@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
+import 'package:itt632_nashcafe/Configuration/networkConfig.dart';
 
 class EditProductPage extends StatefulWidget {
   final int productId;
@@ -37,7 +38,7 @@ class _EditProductPageState extends State<EditProductPage> {
 
   Future<void> _fetchProductDetails() async {
     final response = await http.get(
-      Uri.parse('http://192.168.43.243:80/api/product/${widget.productId}'),
+      Uri.parse('${Config.apiUrl}/${widget.productId}'),
     );
 
     if (response.statusCode == 200) {
@@ -69,7 +70,7 @@ class _EditProductPageState extends State<EditProductPage> {
 
     final request = http.MultipartRequest(
       'POST',
-      Uri.parse('http://192.168.43.243:80/api/edit-product/${widget.productId}'),
+      Uri.parse('${Config.apiUrl}/edit-product/${widget.productId}'),
     );
     request.fields['product_name'] = _productName;
     request.fields['description'] = _description;

@@ -5,6 +5,7 @@ import 'Customer Directory/customer_home.dart';
 import 'Home/homepage.dart';
 import 'Authentication/register.dart';
 import 'Authentication/login.dart';
+import 'package:itt632_nashcafe/Configuration/networkConfig.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

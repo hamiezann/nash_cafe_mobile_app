@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:itt632_nashcafe/Admin%20Directory/admin_home.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import 'package:itt632_nashcafe/Configuration/networkConfig.dart';
 
 import '../Home/homepage.dart';
 
@@ -44,7 +45,7 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> _login() async {
     final response = await http.post(
-      Uri.parse('http://192.168.43.243:80/api/login'), // Replace with your backend URL
+      Uri.parse('${Config.apiUrl}/login'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },

@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
+import 'package:itt632_nashcafe/Configuration/networkConfig.dart';
 
 class CreateProductPage extends StatefulWidget {
   @override
@@ -31,7 +32,7 @@ class _CreateProductPageState extends State<CreateProductPage> {
     }
     _formKey.currentState!.save();
 
-    final request = http.MultipartRequest('POST', Uri.parse('http://192.168.43.243:80/api/create-product'));
+    final request = http.MultipartRequest('POST', Uri.parse('${Config.apiUrl}/create-product'));
     request.fields['product_name'] = _productName;
     request.fields['description'] = _description;
     request.fields['price'] = _price;

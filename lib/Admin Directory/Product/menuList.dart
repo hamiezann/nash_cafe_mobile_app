@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:itt632_nashcafe/Admin%20Directory/Product/addProduct.dart';
 import 'package:itt632_nashcafe/Admin%20Directory/Product/editProduct.dart';
-
+import 'package:itt632_nashcafe/Configuration/networkConfig.dart';
 class AdminMenuList extends StatefulWidget {
   const AdminMenuList({Key? key}) : super(key: key);
 
@@ -16,7 +16,8 @@ class _AdminMenuListState extends State<AdminMenuList> {
 
   Future<void> _menuList() async {
     final response = await http.get(
-      Uri.parse('http://192.168.43.243:80/api/product-list'),
+
+      Uri.parse('${Config.apiUrl}/product-list'),
     );
 
     if (response.statusCode == 200) {
@@ -36,7 +37,7 @@ class _AdminMenuListState extends State<AdminMenuList> {
 
   Future<void> _deleteProduct(int productId) async {
     final response = await http.delete(
-      Uri.parse('http://192.168.43.243:80/api/delete-product/$productId'),
+      Uri.parse('${Config.apiUrl}/delete-product/$productId'),
     );
 
     if (response.statusCode == 200) {
