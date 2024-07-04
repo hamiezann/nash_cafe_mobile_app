@@ -1,9 +1,14 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:itt632_nashcafe/Admin%20Directory/Category/addCategory.dart';
+// import 'package:itt632_nashcafe/Admin%20Directory/Category/editCategory.dart';
 import 'package:itt632_nashcafe/Admin%20Directory/Product/addProduct.dart';
 import 'package:itt632_nashcafe/Admin%20Directory/Product/editProduct.dart';
 import 'package:itt632_nashcafe/Configuration/networkConfig.dart';
+
+import '../Category/editCategory.dart';
+
 class AdminMenuList extends StatefulWidget {
   const AdminMenuList({Key? key}) : super(key: key);
 
@@ -13,10 +18,17 @@ class AdminMenuList extends StatefulWidget {
 
 class _AdminMenuListState extends State<AdminMenuList> {
   List<dynamic> productList = [];
+  List<dynamic> categoryList = []; // Add category list
+
+  @override
+  void initState() {
+    super.initState();
+    _menuList(); // Fetch products
+    _categoryList(); // Fetch categories
+  }
 
   Future<void> _menuList() async {
     final response = await http.get(
-
       Uri.parse('${Config.apiUrl}/product-list'),
     );
 
@@ -35,39 +47,59 @@ class _AdminMenuListState extends State<AdminMenuList> {
     }
   }
 
-  Future<void> _deleteProduct(int productId) async {
-    final response = await http.delete(
-      Uri.parse('${Config.apiUrl}/delete-product/$productId'),
+  Future<void> _categoryList() async {
+    final response = await http.get(
+      Uri.parse('${Config.apiUrl}/category-list'),
     );
 
     if (response.statusCode == 200) {
       setState(() {
-        productList.removeWhere((product) => product['id'] == productId);
+        categoryList = jsonDecode(response.body);
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Product deleted successfully.'),
-          duration: Duration(seconds: 3),
-        ),
-      );
     } else {
-      print('Failed to delete product: ${response.statusCode}');
+      print('Failed to load categories: ${response.statusCode}');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Failed to delete product. Please try again later.'),
+          content: Text('Failed to load categories. Please try again later.'),
           duration: Duration(seconds: 3),
         ),
       );
     }
   }
 
-  void _showDeleteConfirmationDialog(int productId) {
+  Future<void> _deleteCategory(int categoryId) async {
+    final response = await http.delete(
+      Uri.parse('${Config.apiUrl}/delete-category/$categoryId'),
+    );
+
+    if (response.statusCode == 204) {
+      setState(() {
+        categoryList.removeWhere((category) => category['id'] == categoryId);
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Category deleted successfully.'),
+          duration: Duration(seconds: 3),
+        ),
+      );
+    } else {
+      print('Failed to delete category: ${response.statusCode}');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to delete category. Please try again later.'),
+          duration: Duration(seconds: 3),
+        ),
+      );
+    }
+  }
+
+  void _showDeleteConfirmationDialog(int categoryId) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text('Confirm Delete'),
-          content: Text('Are you sure you want to delete this product?'),
+          content: Text('Are you sure you want to delete this category?'),
           actions: <Widget>[
             TextButton(
               onPressed: () {
@@ -78,7 +110,7 @@ class _AdminMenuListState extends State<AdminMenuList> {
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                _deleteProduct(productId);
+                _deleteCategory(categoryId);
               },
               child: Text('Delete'),
             ),
@@ -89,12 +121,6 @@ class _AdminMenuListState extends State<AdminMenuList> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    _menuList();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -102,20 +128,28 @@ class _AdminMenuListState extends State<AdminMenuList> {
         foregroundColor: Colors.white,
         title: Text('Menu'),
         actions: [
+          // Text(
+          //   'Add',
+          //   style: TextStyle(color: Colors.white, fontSize: 16),
+          // ),
           IconButton(
             onPressed: () {
-              print('Add New Product');
-              // Implement functionality to add a new product
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => CreateProductPage()),
+              );
             },
             icon: Icon(Icons.add),
             tooltip: 'Add Product',
           ),
           IconButton(
-            icon: Icon(Icons.category),
             onPressed: () {
-              print('Add New Category');
-              // Implement functionality to add a new category
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => AddCategoryPage()),
+              );
             },
+            icon: Icon(Icons.category),
             tooltip: 'Add Category',
           ),
         ],
@@ -130,125 +164,187 @@ class _AdminMenuListState extends State<AdminMenuList> {
         ),
         child: Column(
           children: [
-            SizedBox(height: 16.0), // Space above the buttons
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (context) => CreateProductPage()), // Replace with your actual LoginPage widget
-                    );
-                    // print('Button 1 pressed');
-                  },
-                  child: Text('Add New Product'),
-                ),
-                SizedBox(width: 16.0), // Space between buttons
-                ElevatedButton(
-                  onPressed: () {
-                    // Navigator.pushReplacement(
-                    //   context,
-                    //   MaterialPageRoute(builder: (context) => EditProductPage()),
-                    // );
-                    print('Button 2 pressed');
-                  },
-                  child: Text('Add New Category'),
-                ),
-              ],
-            ),
             SizedBox(height: 16.0), // Space below the buttons
             Expanded(
-              child: productList.isEmpty
-                  ? Center(child: CircularProgressIndicator())
-                  : ListView.builder(
-                itemCount: productList.length,
-                itemBuilder: (context, index) {
-                  var product = productList[index];
-                  return Card(
-                    margin: EdgeInsets.all(8.0),
-                    child: InkWell(
-                      onTap: () {
-                        print('Product tapped: ${product['product_name']}');
-                        // Navigate to product details or edit page
-                      },
-                      child: Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Container(
-                              width: 50,
-                              height: 50,
-                              decoration: BoxDecoration(
-                                color: Colors.grey,
-                                borderRadius: BorderRadius.circular(8.0),
-                              ),
-                              child: product['image'] != null && product['image'].isNotEmpty
-                            ? ClipRRect(
-                                borderRadius : BorderRadius.circular(8.0),
-                                child: Image.network(
-                                  product['image'],
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
-                                    return Icon(Icons.error);
-                                  },
-                                ),
-                              ):Placeholder(),
-                            ),
-                            SizedBox(width: 16.0),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Text(
+                      textAlign: TextAlign.center,
+
+                      'Products',
+                      style: TextStyle(
+                        fontSize: 20.0,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: productList.isEmpty
+                        ? Center(child: CircularProgressIndicator())
+                        : ListView.builder(
+                      itemCount: productList.length,
+                      itemBuilder: (context, index) {
+                        var product = productList[index];
+                        return Card(
+                          margin: EdgeInsets.all(8.0),
+                          child: InkWell(
+                            onTap: () {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(builder: (context) => EditProductPage(product['id'])),
+                              );
+                            },
+                            child: Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
-                                  Text(
-                                    product['product_name'],
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16.0,
-                                    ),
-                                  ),
-                                  SizedBox(height: 4.0),
-                                  Text(
-                                    product['description'],
-                                    style: TextStyle(
+                                  Container(
+                                    width: 50,
+                                    height: 50,
+                                    decoration: BoxDecoration(
                                       color: Colors.grey,
+                                      borderRadius: BorderRadius.circular(8.0),
+                                    ),
+                                    child: product['image'] != null && product['image'].isNotEmpty
+                                        ? ClipRRect(
+                                      borderRadius: BorderRadius.circular(8.0),
+                                      child: Image.network(
+                                        product['image'],
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
+                                          return Icon(Icons.error);
+                                        },
+                                      ),
+                                    )
+                                        : Placeholder(),
+                                  ),
+                                  SizedBox(width: 16.0),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          product['product_name'],
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16.0,
+                                          ),
+                                        ),
+                                        SizedBox(height: 4.0),
+                                        Text(
+                                          product['description'],
+                                          style: TextStyle(
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+                                        SizedBox(height: 4.0),
+                                        Text(
+                                          '\$${product['price']}',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
-                                  SizedBox(height: 4.0),
-                                  Text(
-                                    '\$${product['price']}',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                                  SizedBox(width: 16.0),
+                                  IconButton(
+                                    icon: Icon(Icons.edit),
+                                    onPressed: () {
+                                      Navigator.pushReplacement(
+                                        context,
+                                        MaterialPageRoute(builder: (context) => EditProductPage(product['id'])),
+                                      );
+                                    },
+                                  ),
+                                  IconButton(
+                                    icon: Icon(Icons.delete),
+                                    onPressed: () {
+                                      _showDeleteConfirmationDialog(product['id']);
+                                    },
                                   ),
                                 ],
                               ),
                             ),
-                            SizedBox(width: 16.0),
-                            IconButton(
-                              icon: Icon(Icons.edit),
-                              onPressed: () {
-                                Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(builder: (context) => EditProductPage(product['id'])),
-                                );
-                                print('Edit Product: ${product['product_name']}');
-                                // Implement edit functionality
-                              },
-                            ),
-                            IconButton(
-                              icon: Icon(Icons.delete),
-                              onPressed: () {
-                                _showDeleteConfirmationDialog(product['id']);
-                              },
-                            ),
-                          ],
-                        ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  SizedBox(height: 16.0), // Space between products and categories
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Text(
+                      'Categories',
+                      style: TextStyle(
+                        fontSize: 20.0,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                  );
-                },
+                  ),
+                  Expanded(
+                    child: categoryList.isEmpty
+                        ? Center(child: CircularProgressIndicator())
+                        : ListView.builder(
+                      itemCount: categoryList.length,
+                      itemBuilder: (context, index) {
+                        var category = categoryList[index];
+                        return Card(
+                          margin: EdgeInsets.all(8.0),
+                          child: InkWell(
+                            onTap: () {
+                              // Implement category details or edit page navigation
+                              // Navigator.pushReplacement(
+                              //   context,
+                              //   MaterialPageRoute(builder: (context) => EditCategoryPage(category['id'])),
+                              // );
+                            },
+                            child: Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.category),
+                                  SizedBox(width: 16.0),
+                                  Expanded(
+                                    child: Text(
+                                      category['category_name'],
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16.0,
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(width: 16.0),
+                                  IconButton(
+                                    icon: Icon(Icons.edit),
+                                    onPressed: () {
+                                      // Implement edit functionality for category
+                                      Navigator.pushReplacement(
+                                        context,
+                                         MaterialPageRoute(builder: (context) => EditCategoryPage(category['id'])),
+                                      );
+                                    },
+                                  ),
+                                  IconButton(
+                                    icon: Icon(Icons.delete),
+                                    onPressed: () {
+                                      _showDeleteConfirmationDialog(category['id']);
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
               ),
             ),
           ],

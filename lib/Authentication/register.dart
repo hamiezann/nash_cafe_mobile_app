@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:itt632_nashcafe/Configuration/networkConfig.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({Key? key}) : super(key: key);
@@ -20,7 +21,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Future<void> _register() async {
     try {
       final response = await http.post(
-        Uri.parse('http://192.168.43.243:80/api/register'), // Replace with your backend API URL
+        // Uri.parse('http://192.168.43.243:80/api/register'),
+        Uri.parse('${Config.apiUrl}/register'),
+        // Uri.parse('http://192.168.35.29:80/api/register'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
