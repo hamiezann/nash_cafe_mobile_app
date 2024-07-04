@@ -55,14 +55,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topRight,
-            end: Alignment.bottomLeft,
-            colors: [
-              Color(0xFF8E2DE2), // Blue-Purple
-              Color(0xFF4A00E0), // Purple
-            ],
-          ),
+          color: Colors.black, // Set the background to black
         ),
         child: Center(
           child: SingleChildScrollView(
@@ -184,13 +177,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           }
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blueAccent,
+                          backgroundColor: Colors.orange,
                           padding: const EdgeInsets.symmetric(vertical: 15.0),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10.0),
                           ),
                         ),
-                        child: const Text('REGISTER'),
+                        child: const Text(
+                          'REGISTER',
+                          style: TextStyle(color: Colors.black), // Set font color to black
+                        ),
                       ),
                     ),
                   ],
