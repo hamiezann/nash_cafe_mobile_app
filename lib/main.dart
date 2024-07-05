@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:itt632_nashcafe/Admin%20Directory/Order/orderList.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:itt632_nashcafe/Admin%20Directory/admin_home.dart';
 import 'Customer Directory/customer_home.dart';
@@ -40,6 +41,7 @@ class MyApp extends StatelessWidget {
         '/login': (context) => LoginPage(),
         '/admin-home': (context) => AdminHomePage(),
         '/customer-home': (context) => CustomerHomePage(),
+        '/order-page': (context) => OrdersPage(),
       },
     );
   }
