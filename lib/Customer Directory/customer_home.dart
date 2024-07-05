@@ -89,6 +89,19 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
     }
   }
 
+  void _viewAllProducts(BuildContext context, int categoryId, String categoryName, List<dynamic> products) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => MenuPage(
+          categoryId: categoryId,
+          categoryName: categoryName,
+          products: products,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -180,7 +193,7 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
                     } else {
                       final categories = snapshot.data?['categories'] ?? [];
                       final products = snapshot.data?['products'] ?? [];
-                      return _buildCategorySection(context, 'Categories', categories, products);
+                      return _buildCategorySection(context, categories, products);
                     }
                   },
                 ),
@@ -215,10 +228,15 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
     );
   }
 
-  Widget _buildCategorySection(BuildContext context, String title, List<dynamic> categories, List<dynamic> products) {
+  Widget _buildCategorySection(BuildContext context, List<dynamic> categories, List<dynamic> products) {
+    final categoriesWithProducts = categories.where((category) {
+      final categoryId = category['id'];
+      return products.any((product) => product['category_id'] == categoryId);
+    }).toList();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: categories.map<Widget>((category) {
+      children: categoriesWithProducts.map<Widget>((category) {
         final categoryId = category['id'];
         final categoryName = category['category_name'] ?? 'Unknown';
         final categoryProducts = products.where((product) => product['category_id'] == categoryId).toList();
@@ -227,9 +245,21 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(height: 16),
-            Text(
-              categoryName,
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  categoryName,
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                TextButton(
+                  onPressed: () => _viewAllProducts(context, categoryId, categoryName, products),
+                  child: Text(
+                    'View All',
+                    style: TextStyle(fontSize: 14, color: Colors.pink),
+                  ),
+                ),
+              ],
             ),
             SizedBox(height: 8),
             Wrap(

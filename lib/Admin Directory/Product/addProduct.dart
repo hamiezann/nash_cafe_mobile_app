@@ -15,17 +15,40 @@ class _CreateProductPageState extends State<CreateProductPage> {
   String _productName = '';
   String _description = '';
   String _price = '';
-  int _categoryId = 1;
+  int? _categoryId;
   File? _image;
   final _rating = '3.5';
 
-  // Define the category items with their ids
-  Map<String, int> categoryItems = {
-    'Coffee': 1,
-    'Sandwiches': 2,
-    'Desserts': 3,
-  };
+  List<dynamic> category = [];
 
+  @override
+  void initState() {
+    super.initState();
+    _categoryList();
+  }
+
+  Future<void> _categoryList() async {
+    final response = await http.get(
+      Uri.parse('${Config.apiUrl}/category-list'),
+    );
+    if (response.statusCode == 200) {
+      setState(() {
+        category = jsonDecode(response.body);
+        // Set the initial category id to the first category in the list if available
+        if (category.isNotEmpty) {
+          _categoryId = category[0]['id'] as int?;
+        }
+      });
+    } else {
+      print('Failed to load category: ${response.statusCode}');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to load category. Please try again later.'),
+          duration: Duration(seconds: 3),
+        ),
+      );
+    }
+  }
   Future<void> _createProduct() async {
     if (!_formKey.currentState!.validate()) {
       return;
@@ -102,15 +125,15 @@ class _CreateProductPageState extends State<CreateProductPage> {
                 DropdownButtonFormField<int>(
                   value: _categoryId,
                   decoration: InputDecoration(labelText: 'Category'),
-                  items: categoryItems.entries.map((entry) {
+                  items: category.map<DropdownMenuItem<int>>((category) {
                     return DropdownMenuItem<int>(
-                      value: entry.value,
-                      child: Text(entry.key),
+                      value: category['id'] as int,
+                      child: Text(category['category_name'] as String),
                     );
                   }).toList(),
                   onChanged: (value) {
                     setState(() {
-                      _categoryId = value!;
+                      _categoryId = value;
                     });
                   },
                   validator: (value) {

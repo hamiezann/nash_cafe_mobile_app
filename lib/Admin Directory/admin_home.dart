@@ -77,12 +77,14 @@ class AdminHomePage extends StatelessWidget {
         children: [
           Container(
             color: Color(0xFF071952),
-            height: 160,
+            height: 120,
           ),
           Container(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(12.0),
+            alignment: Alignment.center,
             child:  Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            // mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
                 'Hello Admin',
@@ -95,7 +97,7 @@ class AdminHomePage extends StatelessWidget {
             ],
           ),),
           Container(
-            margin: EdgeInsets.only(top: 130),
+            margin: EdgeInsets.only(top: 90),
             decoration: BoxDecoration(
               // color: Color(0xFFFCF3CF),
                 gradient: LinearGradient(
@@ -104,7 +106,7 @@ class AdminHomePage extends StatelessWidget {
                   end: Alignment.bottomRight,
                 ),
               borderRadius: BorderRadius.vertical(
-                top: Radius.circular(15),
+                top: Radius.circular(20),
               ),
             ),// Adjust the top margin to overlap with the top section
             child: SingleChildScrollView(
@@ -118,7 +120,7 @@ class AdminHomePage extends StatelessWidget {
                     //   "Let's find out a perfect workspace for you",
                     //   style: TextStyle(fontSize: 16, color: Colors.black54),
                     // ),
-                    SizedBox(height: 20),
+                    SizedBox(height: 45),
                     _buildCategoryIcons(context),
                     SizedBox(height: 20),
                     Text(
@@ -134,10 +136,10 @@ class AdminHomePage extends StatelessWidget {
             ),
           ),
           Positioned(
-            top: 100, // Adjust the top position to overlap the search bar on both sections
+            top: 70, // Adjust the top position to overlap the search bar on both sections
             left: 16,
             right: 16,
-            child: _buildSearchBar(),
+            child: _buildSearchBar(),  //search bar
           ),
         ],
       ),
@@ -200,7 +202,7 @@ class AdminHomePage extends StatelessWidget {
         children: [
           CircleAvatar(
             radius: 30,
-            backgroundColor: Colors.brown[900],
+            backgroundColor: Colors.grey,
             child: Icon(icon, size: 30, color: Colors.white),
           ),
           SizedBox(height: 8),

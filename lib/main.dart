@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:itt632_nashcafe/Admin%20Directory/admin_home.dart';
 import 'Customer Directory/customer_home.dart';
+import 'Admin Directory/admin_home.dart';
 import 'Home/homepage.dart';
 import 'Authentication/register.dart';
 import 'Authentication/login.dart';
-import 'package:itt632_nashcafe/Configuration/networkConfig.dart';
-
+import 'Configuration/networkConfig.dart';
 import 'Menu/menupage.dart';
 
 void main() async {
@@ -42,8 +41,7 @@ class MyApp extends StatelessWidget {
         '/login': (context) => LoginPage(),
         '/admin-home': (context) => AdminHomePage(),
         '/customer-home': (context) => CustomerHomePage(),
-        '/menu': (context) => MenuPage(), // Add route for menu page
-
+        // '/menu': (context) => MenuPage(), // Remove static route definition for MenuPage
       },
     );
   }

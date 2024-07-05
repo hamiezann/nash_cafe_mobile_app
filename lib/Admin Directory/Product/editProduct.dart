@@ -18,7 +18,7 @@ class _EditProductPageState extends State<EditProductPage> {
   String _productName = '';
   String _description = '';
   String _price = '';
-  int _categoryId = 1;
+  int? _categoryId = 1;
   File? _image;
   String _rating = '';
   String? _imageUrl;
@@ -30,15 +30,41 @@ class _EditProductPageState extends State<EditProductPage> {
     'Desserts': 3,
   };
 
+  List<dynamic> category = [];
+
   @override
   void initState() {
     super.initState();
     _fetchProductDetails();
+    _categoryList();
+  }
+
+  Future<void> _categoryList() async {
+    final response = await http.get(
+      Uri.parse('${Config.apiUrl}/category-list'),
+    );
+    if (response.statusCode == 200) {
+      setState(() {
+        category = jsonDecode(response.body);
+        // Set the initial category id to the first category in the list if available
+        if (category.isNotEmpty) {
+          _categoryId = category[0]['id'] as int?;
+        }
+      });
+    } else {
+      print('Failed to load category: ${response.statusCode}');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to load category. Please try again later.'),
+          duration: Duration(seconds: 3),
+        ),
+      );
+    }
   }
 
   Future<void> _fetchProductDetails() async {
     final response = await http.get(
-      Uri.parse('${Config.apiUrl}/${widget.productId}'),
+      Uri.parse('${Config.apiUrl}/product/${widget.productId}'),
     );
 
     if (response.statusCode == 200) {
@@ -154,10 +180,10 @@ class _EditProductPageState extends State<EditProductPage> {
                 DropdownButtonFormField<int>(
                   value: _categoryId,
                   decoration: InputDecoration(labelText: 'Category'),
-                  items: categoryItems.entries.map((entry) {
+                  items: category.map<DropdownMenuItem<int>>((category) {
                     return DropdownMenuItem<int>(
-                      value: entry.value,
-                      child: Text(entry.key),
+                      value: category['id'] as int,
+                      child: Text(category['category_name'] as String),
                     );
                   }).toList(),
                   onChanged: (value) {
