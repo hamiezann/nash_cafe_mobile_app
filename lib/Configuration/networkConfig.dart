@@ -1,4 +1,4 @@
 
 class Config {
-  static const String apiUrl = 'http://ip:80/api';
+  static const String apiUrl = 'http://172.20.10.4:80/api';
 }

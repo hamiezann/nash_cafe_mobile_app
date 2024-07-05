@@ -7,6 +7,8 @@ import 'Authentication/register.dart';
 import 'Authentication/login.dart';
 import 'package:itt632_nashcafe/Configuration/networkConfig.dart';
 
+import 'Menu/menupage.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -29,7 +31,7 @@ class MyApp extends StatelessWidget {
       title: 'Nash Cafe Mobile App',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSwatch(
-          primarySwatch: Colors.cyan,
+          primarySwatch: Colors.blueGrey,
         ),
         useMaterial3: true,
       ),
@@ -40,6 +42,8 @@ class MyApp extends StatelessWidget {
         '/login': (context) => LoginPage(),
         '/admin-home': (context) => AdminHomePage(),
         '/customer-home': (context) => CustomerHomePage(),
+        '/menu': (context) => MenuPage(), // Add route for menu page
+
       },
     );
   }

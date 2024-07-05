@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:itt632_nashcafe/Admin%20Directory/admin_home.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
-import 'package:itt632_nashcafe/Configuration/networkConfig.dart';
 
+import '../Configuration/networkConfig.dart';
+import '../Admin Directory/admin_home.dart';
 import '../Home/homepage.dart';
 
 class LoginPage extends StatefulWidget {
@@ -33,54 +33,56 @@ class _LoginPageState extends State<LoginPage> {
     if (isLoggedIn) {
       String role = prefs.getString('role') ?? 'customer';
       setState(() {
-        isAdmin = role == 'admin'; // Update isAdmin based on the role
+        isAdmin = role == 'admin';
       });
-      if (isAdmin) {
-        Navigator.pushReplacementNamed(context, '/admin-home');
-      } else {
-        Navigator.pushReplacementNamed(context, '/customer-home');
-      }
+      _navigateToHome(isAdmin);
     }
   }
 
   Future<void> _login() async {
-    final response = await http.post(
-      Uri.parse('${Config.apiUrl}/login'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode(<String, String>{
-        'email': _emailController.text,
-        'password': _passwordController.text,
-      }),
-    );
+    if (_formKey.currentState!.validate()) {
+      try {
+        final response = await http.post(
+          Uri.parse('${Config.apiUrl}/login'),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: jsonEncode(<String, String>{
+            'email': _emailController.text,
+            'password': _passwordController.text,
+          }),
+        );
 
-    if (response.statusCode == 200) {
-      var data = jsonDecode(response.body);
-      String token = data['access_token'];
-      String role = data['role'];
-      int userId = data['userId'];
+        if (response.statusCode == 200) {
+          var data = jsonDecode(response.body);
+          String token = data['access_token'];
+          String role = data['role'];
+          int userId = data['userId'];
 
-      // Handle successful login
-      // Store token and userId for future requests
-      final prefs = await SharedPreferences.getInstance();
-      prefs.setString('token', token);
-      prefs.setInt('userId', userId);
-      prefs.setString('role', role); // Save the role
-      prefs.setBool('isLoggedIn', true);
-      // You can use Flutter Secure Storage to store the token securely
-      setState(() {
-        isAdmin = role == 'admin'; // Update isAdmin based on the role after login
-      });
+          final prefs = await SharedPreferences.getInstance();
+          prefs.setString('token', token);
+          prefs.setInt('userId', userId);
+          prefs.setString('role', role);
+          prefs.setBool('isLoggedIn', true);
 
-      if (isAdmin) {
-        Navigator.pushReplacementNamed(context, '/admin-home');
-      } else {
-        Navigator.pushReplacementNamed(context, '/customer-home');
+          setState(() {
+            isAdmin = role == 'admin';
+          });
+
+          _navigateToHome(isAdmin);
+        } else {
+          _showLoginError();
+        }
+      } catch (e) {
+        print('Error during login: $e');
+        _showLoginError();
       }
-    } else {
-      _showLoginError();
     }
+  }
+
+  void _navigateToHome(bool isAdmin) {
+    Navigator.pushReplacementNamed(
+        context, isAdmin ? '/admin-home' : '/customer-home');
   }
 
   void _showLoginError() {
@@ -109,25 +111,15 @@ class _LoginPageState extends State<LoginPage> {
         children: [
           Positioned.fill(
             child: Image.asset(
-              'assets/background2.jpeg', // Background image
+              'assets/background2.jpeg',
               fit: BoxFit.cover,
             ),
           ),
           Positioned.fill(
             child: Container(
-              color: Colors.black.withOpacity(0.5), // Dark overlay for contrast
+              color: Colors.black.withOpacity(0.5),
             ),
           ),
-          // // Background image
-          // Container(
-          //   decoration: BoxDecoration(
-          //     image: DecorationImage(
-          //       image: AssetImage('assets/background2.jpeg'),
-          //       fit: BoxFit.cover,
-          //     ),
-          //   ),
-          // ),
-          // // Foreground content
           Center(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 32.0),
@@ -136,7 +128,7 @@ class _LoginPageState extends State<LoginPage> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                    SizedBox(height: 300), // Adjust height to position elements correctly
+                    SizedBox(height: 300),
                     Text(
                       'LOGIN',
                       style: TextStyle(
@@ -200,11 +192,7 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     SizedBox(height: 20),
                     ElevatedButton(
-                      onPressed: () {
-                        if (_formKey.currentState!.validate()) {
-                          _login();
-                        }
-                      },
+                      onPressed: _login,
                       style: ElevatedButton.styleFrom(
                         foregroundColor: Colors.black, backgroundColor: Colors.orange,
                         minimumSize: Size(double.infinity, 50),
@@ -214,6 +202,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       child: Text('Sign In'),
                     ),
+                    SizedBox(height: 20),
                   ],
                 ),
               ),
