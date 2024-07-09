@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:itt632_nashcafe/Admin%20Directory/Order/orderList.dart';
 import 'package:itt632_nashcafe/Admin%20Directory/Product/menuList.dart';
 import 'package:itt632_nashcafe/Home/homepage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -183,7 +184,7 @@ class AdminHomePage extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         _buildCategoryIcon(context, Icons.restaurant, 'Menu', AdminMenuList()),
-        _buildCategoryIcon(context, Icons.add_chart_outlined, 'Order',  AdminMenuList()),
+        _buildCategoryIcon(context, Icons.add_chart_outlined, 'Order',  OrdersPage()),
         _buildCategoryIcon(context, Icons.menu_book_outlined, 'Payment',  AdminMenuList()),
         _buildCategoryIcon(context, Icons.star_half_outlined, 'Rating',  AdminMenuList()),
       ],

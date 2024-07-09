@@ -1,11 +1,39 @@
 import 'package:flutter/material.dart';
-import 'package:itt632_nashcafe/Admin%20Directory/Product/menuList.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
-import '../Authentication/login.dart';
+import '../Configuration/networkConfig.dart';
+import '../Home/homepage.dart';
+import '../Menu/menupage.dart';
 
-class CustomerHomePage extends StatelessWidget {
+void main() {
+  runApp(MyApp());
+}
 
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: CustomerHomePage(),
+      theme: ThemeData(
+        primarySwatch: Colors.pink,
+        visualDensity: VisualDensity.adaptivePlatformDensity,
+      ),
+      routes: {
+        '/homepage': (context) => HomePage(),
+        // Add other routes here
+      },
+    );
+  }
+}
+
+class CustomerHomePage extends StatefulWidget {
+  @override
+  _CustomerHomePageState createState() => _CustomerHomePageState();
+}
+
+class _CustomerHomePageState extends State<CustomerHomePage> {
   Future<void> _logout(BuildContext context) async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -40,177 +68,234 @@ class CustomerHomePage extends StatelessWidget {
     }
   }
 
+  late Future<Map<String, dynamic>> _data;
+
+  @override
+  void initState() {
+    super.initState();
+    _data = fetchData();
+  }
+
+  Future<Map<String, dynamic>> fetchData() async {
+    final categoriesResponse = await http.get(Uri.parse('${Config.apiUrl}/category-list'));
+    final productsResponse = await http.get(Uri.parse('${Config.apiUrl}/product-list'));
+
+    if (categoriesResponse.statusCode == 200 && productsResponse.statusCode == 200) {
+      final categories = json.decode(categoriesResponse.body);
+      final products = json.decode(productsResponse.body);
+      return {'categories': categories, 'products': products};
+    } else {
+      throw Exception('Failed to load data');
+    }
+  }
+
+  void _viewAllProducts(BuildContext context, int categoryId, String categoryName, List<dynamic> products) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => MenuPage(
+          categoryId: categoryId,
+          categoryName: categoryName,
+          products: products,
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Color(0xFF071952),
-        foregroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.menu),
-          onPressed: () {
-            // Handle menu button press
-          },
-        ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.logout_rounded),
-            onPressed: () {
-              _logout(context);
-            },
-          ),
-          SizedBox(width: 10),
-        ],
-      ),
-      body: Stack(
-        children: [
-          Container(
-            color: Color(0xFF071952),
-            height: 160,
-          ),
-          Container(
-            padding: const EdgeInsets.all(16.0),
-            child:  Column(
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Hello Customer',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
-                ),
-                Text(
-                  'Discover our menu and place your order!',
-                  style: TextStyle(fontSize: 16, color: Colors.white60),
-                ),
-              ],
-            ),),
-          Container(
-            margin: EdgeInsets.only(top: 130),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.lightBlue, Colors.red, Colors.white],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.vertical(
-                top: Radius.circular(15),
-              ),
-            ),
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    SizedBox(height: 30),
-                    _buildCategoryIcons(context),
-                    SizedBox(height: 20),
-                    Text(
-                      'Recommended for you',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Good Morning,',
+                          style: TextStyle(fontSize: 18, color: Colors.grey),
+                        ),
+                        Text(
+                          'Jimmy Sullivan',
+                          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                        ),
+                      ],
                     ),
-                    SizedBox(height: 10),
-                    _buildRecommendedList(),
-                    SizedBox(height: 230),
+                    IconButton(
+                      icon: Icon(Icons.mail_outline),
+                      onPressed: () {
+                        // Handle mail button press
+                      },
+                    ),
                   ],
                 ),
-              ),
+                SizedBox(height: 16),
+                Container(
+                  padding: EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade200,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Share Happiness',
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                          ),
+                          SizedBox(height: 4),
+                          Text(
+                            'Buy 1 Get 1',
+                            style: TextStyle(fontSize: 16, color: Colors.pink),
+                          ),
+                          SizedBox(height: 8),
+                          ElevatedButton(
+                            onPressed: () {
+                              // Handle find out more button press
+                            },
+                            child: Text('Find out more'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.black,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(30),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      Spacer(),
+                      Image.network(
+                        'https://via.placeholder.com/100', // Replace with actual image URL
+                        width: 100,
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 16),
+                FutureBuilder<Map<String, dynamic>>(
+                  future: _data,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Center(child: CircularProgressIndicator());
+                    } else if (snapshot.hasError) {
+                      return Center(child: Text('Failed to load data'));
+                    } else {
+                      final categories = snapshot.data?['categories'] ?? [];
+                      final products = snapshot.data?['products'] ?? [];
+                      return _buildCategorySection(context, categories, products);
+                    }
+                  },
+                ),
+              ],
             ),
           ),
-          Positioned(
-            top: 100,
-            left: 16,
-            right: 16,
-            child: _buildSearchBar(),
+        ),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        items: [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: '',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.receipt),
+            label: '',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.card_giftcard),
+            label: '',
+          ),
+          BottomNavigationBarItem(
+            icon: CircleAvatar(
+              radius: 15,
+              backgroundImage: NetworkImage('https://via.placeholder.com/150'), // Replace with actual image URL
+            ),
+            label: '',
           ),
         ],
       ),
     );
   }
 
-  Widget _buildSearchBar() {
+  Widget _buildCategorySection(BuildContext context, List<dynamic> categories, List<dynamic> products) {
+    final categoriesWithProducts = categories.where((category) {
+      final categoryId = category['id'];
+      return products.any((product) => product['category_id'] == categoryId);
+    }).toList();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: categoriesWithProducts.map<Widget>((category) {
+        final categoryId = category['id'];
+        final categoryName = category['category_name'] ?? 'Unknown';
+        final categoryProducts = products.where((product) => product['category_id'] == categoryId).toList();
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  categoryName,
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                TextButton(
+                  onPressed: () => _viewAllProducts(context, categoryId, categoryName, products),
+                  child: Text(
+                    'View All',
+                    style: TextStyle(fontSize: 14, color: Colors.pink),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 8),
+            Wrap(
+              spacing: 8.0,
+              runSpacing: 8.0,
+              children: categoryProducts.map((product) {
+                return _buildProductButton(context, product['product_name'] ?? 'Unknown');
+              }).toList(),
+            ),
+          ],
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildProductButton(BuildContext context, String label) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 10),
+      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(30),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black26,
-            blurRadius: 5,
-            offset: Offset(0, 2),
-          ),
-        ],
+        color: Colors.grey.shade200,
+        borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.search, color: Colors.black54),
-          SizedBox(width: 10),
-          Expanded(
-            child: TextField(
-              decoration: InputDecoration(
-                hintText: 'Search here...',
-                border: InputBorder.none,
-              ),
-            ),
+          Icon(
+            Icons.local_cafe,
+            color: Colors.black,
+            size: 20,
           ),
-          Icon(Icons.qr_code_scanner, color: Colors.black54),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCategoryIcons(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        _buildCategoryIcon(context, Icons.restaurant, 'Menu', AdminMenuList()),
-        _buildCategoryIcon(context, Icons.add_chart_outlined, 'Order',  AdminMenuList()),
-        // Add more customer-oriented categories as needed
-      ],
-    );
-  }
-
-  Widget _buildCategoryIcon(BuildContext context, IconData icon, String label, Widget page) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => page),
-        );
-      },
-      child: Column(
-        children: [
-          CircleAvatar(
-            radius: 30,
-            backgroundColor: Colors.brown[900],
-            child: Icon(icon, size: 30, color: Colors.white),
+          SizedBox(width: 8),
+          Text(
+            label,
+            style: TextStyle(fontSize: 16),
           ),
-          SizedBox(height: 8),
-          Text(label, style: TextStyle(color: Colors.black)),
         ],
-      ),
-    );
-  }
-
-  Widget _buildRecommendedList() {
-    return Column(
-      children: [
-        _buildRecommendedItem('Digital Desk Coworking', '3329 White Lane, Georgia', 'Rs. 5,890/day'),
-        SizedBox(height: 10),
-        _buildRecommendedItem('Renuin Studio', 'Kasardevi, Uttarakhand', 'Rs. 7,890/day'),
-      ],
-    );
-  }
-
-  Widget _buildRecommendedItem(String title, String subtitle, String price) {
-    return Card(
-      child: ListTile(
-        leading: Image.network('https://via.placeholder.com/100'), // Replace with actual image
-        title: Text(title),
-        subtitle: Text(subtitle),
-        trailing: Text(price, style: TextStyle(fontWeight: FontWeight.bold)),
       ),
     );
   }

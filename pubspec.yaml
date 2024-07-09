@@ -64,6 +64,25 @@ flutter:
   - assets./bowl_image.jpeg
   - assets./logo_nash.jpeg
   - assets./background2.jpeg
+  - assets./chocolate cake.jpeg
+  - assets./french fries.jpeg
+  - assets./grilledsalmon.jpeg
+  - assets./latte.jpeg
+  - assets./mashed potatoes.jpeg
+  - assets./nachos.jpeg
+  - assets./sprite.jpeg
+  - assets./steak.jpeg
+  - assets./tiramisu cake.jpeg
+  - assets./spring rolls.jpeg
+  - assets./tea.jpeg
+  - assets./steamed vegetables.jpeg
+  - assets./ice cream chocalate.jpeg
+  - assets./coleslaw.jpeg
+  - assets./prawn.jpeg
+  - assets./mango smoothie.jpeg
+  - assets./mozarella sticks.jpeg
+
+
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
